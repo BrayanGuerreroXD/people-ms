@@ -9,13 +9,13 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-class PostgreSQLConnectionPoolTest {
+class MySQLConnectionPoolTest {
 
     @InjectMocks
-    private PostgreSQLConnectionPool connectionPool;
+    private MySQLConnectionPool connectionPool;
 
     @Mock
-    private PostgresqlConnectionProperties properties;
+    private MySQLConnectionProperties properties;
 
 
     @BeforeEach
@@ -23,9 +23,8 @@ class PostgreSQLConnectionPoolTest {
         MockitoAnnotations.openMocks(this);
 
         when(properties.host()).thenReturn("localhost");
-        when(properties.port()).thenReturn(5432);
+        when(properties.port()).thenReturn(3306);
         when(properties.database()).thenReturn("dbName");
-        when(properties.schema()).thenReturn("schema");
         when(properties.username()).thenReturn("username");
         when(properties.password()).thenReturn("password");
     }
