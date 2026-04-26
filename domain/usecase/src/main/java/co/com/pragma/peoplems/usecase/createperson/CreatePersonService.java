@@ -1,7 +1,8 @@
 package co.com.pragma.peoplems.usecase.createperson;
 
 import co.com.pragma.peoplems.model.person.Person;
+import reactor.core.publisher.Mono;
 
 public interface CreatePersonService {
-    Person create(Person person);
+    Mono<Person> create(Person person);
 }

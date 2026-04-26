@@ -1,12 +1,11 @@
 package co.com.pragma.peoplems.usecase.getperson;
 
 import co.com.pragma.peoplems.model.person.Person;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface GetPersonService {
-    Optional<Person> getById(Long id);
-    Optional<Person> getByEmail(String email);
-    List<Person> getAll();
+    Mono<Person> getById(Long id);
+    Mono<Person> getByEmail(String email);
+    Flux<Person> getAll();
 }
