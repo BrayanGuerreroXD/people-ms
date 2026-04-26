@@ -2,8 +2,6 @@ package co.com.pragma.peoplems.model.exception;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GlobalExceptionEnumTest {
@@ -18,10 +16,10 @@ class GlobalExceptionEnumTest {
 
     @Test
     void enumShouldExposeStringAccessors() {
-        Function<GlobalExceptionEnum, String> msg  = GlobalExceptionEnum::getMessage;
-        Function<GlobalExceptionEnum, String> desc = GlobalExceptionEnum::getDescription;
-        assertThat(msg).isNotNull();
-        assertThat(desc).isNotNull();
+        for (GlobalExceptionEnum value : GlobalExceptionEnum.values()) {
+            assertThat(value.getMessage()).isNotBlank();
+            assertThat(value.getDescription()).isNotBlank();
+        }
     }
 
     @Test
