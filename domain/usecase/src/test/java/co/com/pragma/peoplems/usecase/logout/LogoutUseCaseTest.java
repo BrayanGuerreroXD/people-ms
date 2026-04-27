@@ -1,11 +1,11 @@
 package co.com.pragma.peoplems.usecase.logout;
 
-import co.com.pragma.peoplems.model.exception.NotFoundException;
 import co.com.pragma.peoplems.model.exception.UnauthorizedException;
 import co.com.pragma.peoplems.model.person.Person;
 import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
 import co.com.pragma.peoplems.model.security.JwtGateway;
 import co.com.pragma.peoplems.model.security.LoggedUser;
+import co.com.pragma.peoplems.usecase.getperson.GetPersonService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +24,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LogoutUseCaseTest {
 
-    @Mock private PersonRepository personRepository;
+    @Mock private GetPersonService getPersonService;
+    @Mock private co.com.pragma.peoplems.usecase.onlysaveperson.OnlySavePersonService onlySavePersonService;
     @Mock private JwtGateway jwtGateway;
 
     @InjectMocks
@@ -39,35 +40,35 @@ class LogoutUseCaseTest {
             .build();
 
     @Test
-    void logout_whenPersonNotFound_throwsNotFoundException() {
+    void logout_whenPersonNotFound_throwsUnauthorizedException() {
         when(jwtGateway.validateToken("valid-jwt", null)).thenReturn(LOGGED_USER);
-        when(personRepository.findByEmail("user@test.com")).thenReturn(Mono.empty());
+        when(getPersonService.getByEmail("user@test.com")).thenReturn(Mono.empty());
 
         StepVerifier.create(logoutUseCase.logout("valid-jwt"))
-                .expectError(NotFoundException.class)
+                .expectError(UnauthorizedException.class)
                 .verify();
 
-        verify(personRepository, never()).save(any());
+        verify(onlySavePersonService, never()).save(any());
     }
 
     @Test
     void logout_whenTokenMismatch_throwsUnauthorizedException() {
         when(jwtGateway.validateToken("different-jwt", null)).thenReturn(LOGGED_USER);
-        when(personRepository.findByEmail("user@test.com")).thenReturn(Mono.just(PERSON_WITH_TOKEN));
+        when(getPersonService.getByEmail("user@test.com")).thenReturn(Mono.just(PERSON_WITH_TOKEN));
 
         StepVerifier.create(logoutUseCase.logout("different-jwt"))
                 .expectError(UnauthorizedException.class)
                 .verify();
 
-        verify(personRepository, never()).save(any());
+        verify(onlySavePersonService, never()).save(any());
     }
 
     @Test
     void logout_whenValid_clearsTokenAndCompletes() {
         Person nulledToken = PERSON_WITH_TOKEN.toBuilder().token(null).build();
         when(jwtGateway.validateToken("valid-jwt", null)).thenReturn(LOGGED_USER);
-        when(personRepository.findByEmail("user@test.com")).thenReturn(Mono.just(PERSON_WITH_TOKEN));
-        when(personRepository.save(any(Person.class))).thenReturn(Mono.just(nulledToken));
+        when(getPersonService.getByEmail("user@test.com")).thenReturn(Mono.just(PERSON_WITH_TOKEN));
+        when(onlySavePersonService.save(any(Person.class))).thenReturn(Mono.just(nulledToken));
 
         StepVerifier.create(logoutUseCase.logout("valid-jwt"))
                 .verifyComplete();

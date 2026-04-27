@@ -1,12 +1,12 @@
 package co.com.pragma.peoplems.usecase.logout;
 
 import co.com.pragma.peoplems.model.exception.GlobalExceptionEnum;
-import co.com.pragma.peoplems.model.exception.NotFoundException;
 import co.com.pragma.peoplems.model.exception.UnauthorizedException;
 import co.com.pragma.peoplems.model.person.Person;
-import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
 import co.com.pragma.peoplems.model.security.JwtGateway;
 import co.com.pragma.peoplems.model.security.LoggedUser;
+import co.com.pragma.peoplems.usecase.getperson.GetPersonService;
+import co.com.pragma.peoplems.usecase.onlysaveperson.OnlySavePersonService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,14 +15,15 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class LogoutUseCase implements LogoutService {
 
-    private final PersonRepository personRepository;
+    private final GetPersonService getPersonService;
+    private final OnlySavePersonService onlySavePersonService;
     private final JwtGateway jwtGateway;
 
     @Override
     public Mono<Void> logout(String token) {
         LoggedUser loggedUser = jwtGateway.validateToken(token, null);
-        return personRepository.findByEmail(loggedUser.getEmail())
-                .switchIfEmpty(Mono.error(new NotFoundException(GlobalExceptionEnum.PERSON_NOT_FOUND)))
+        return getPersonService.getByEmail(loggedUser.getEmail())
+                .switchIfEmpty(Mono.error(new UnauthorizedException(GlobalExceptionEnum.INVALID_TOKEN)))
                 .flatMap(person -> {
                     if (!token.equals(person.getToken())) {
                         return Mono.error(new UnauthorizedException(GlobalExceptionEnum.INVALID_TOKEN));
@@ -31,7 +32,7 @@ public class LogoutUseCase implements LogoutService {
                             .token(null)
                             .updatedAt(LocalDateTime.now())
                             .build();
-                    return personRepository.save(updated);
+                    return onlySavePersonService.save(updated);
                 })
                 .then();
     }
