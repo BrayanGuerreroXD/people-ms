@@ -1,5 +1,7 @@
 package co.com.pragma.peoplems.usecase.logout;
 
+import reactor.core.publisher.Mono;
+
 public interface LogoutService {
-    void logout();
+    Mono<Void> logout(String token);
 }

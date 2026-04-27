@@ -1,7 +1,8 @@
 package co.com.pragma.peoplems.usecase.login;
 
 import co.com.pragma.peoplems.model.auth.Auth;
+import reactor.core.publisher.Mono;
 
 public interface LoginService {
-    Auth login(Auth auth);
+    Mono<Auth> login(Auth auth);
 }
