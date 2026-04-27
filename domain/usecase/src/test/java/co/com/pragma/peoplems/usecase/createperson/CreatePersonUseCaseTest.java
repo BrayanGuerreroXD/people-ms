@@ -1,9 +1,12 @@
 package co.com.pragma.peoplems.usecase.createperson;
 
 import co.com.pragma.peoplems.model.exception.ConflictException;
+import co.com.pragma.peoplems.model.exception.ForbiddenException;
 import co.com.pragma.peoplems.model.person.Person;
 import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
 import co.com.pragma.peoplems.model.security.EncryptionGateway;
+import co.com.pragma.peoplems.model.security.LoggedUser;
+import co.com.pragma.peoplems.model.security.UserContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,8 +28,31 @@ class CreatePersonUseCaseTest {
     @Mock
     EncryptionGateway encryptionGateway;
 
+    @Mock
+    private UserContext userContext;
+
     @InjectMocks
     CreatePersonUseCase useCase;
+
+    private static final LoggedUser ADMIN_USER = LoggedUser.builder()
+            .email("admin@test.com").isAdmin(true).build();
+    private static final LoggedUser REGULAR_USER = LoggedUser.builder()
+            .email("user@test.com").isAdmin(false).build();
+
+    @Test
+    void create_whenUserIsNotAdmin_throwsForbiddenException() {
+        when(userContext.currentUser()).thenReturn(Mono.just(REGULAR_USER));
+        Person input = Person.builder()
+                .email("john@test.com")
+                .password("secret")
+                .name("John")
+                .age(30)
+                .build();
+
+        StepVerifier.create(useCase.create(input))
+                .expectError(ForbiddenException.class)
+                .verify();
+    }
 
     @Test
     void create_whenEmailDoesNotExist_shouldSavePersonWithEncodedPasswordAndDefaults() {
@@ -37,6 +63,7 @@ class CreatePersonUseCaseTest {
                 .age(30)
                 .build();
 
+        when(userContext.currentUser()).thenReturn(Mono.just(ADMIN_USER));
         when(personRepository.findByEmail("john@test.com")).thenReturn(Mono.empty());
         when(encryptionGateway.encode("secret")).thenReturn("encoded");
         // Return the same Person passed to save() so we can assert its fields
@@ -64,6 +91,7 @@ class CreatePersonUseCaseTest {
 
         Person existing = Person.builder().email("existing@test.com").build();
 
+        when(userContext.currentUser()).thenReturn(Mono.just(ADMIN_USER));
         when(personRepository.findByEmail("existing@test.com")).thenReturn(Mono.just(existing));
 
         StepVerifier.create(useCase.create(input))
