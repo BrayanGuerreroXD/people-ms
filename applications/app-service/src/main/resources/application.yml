@@ -25,5 +25,8 @@ management:
     health:
       probes:
         enabled: true
+jwt:
+  secret: "cHJhZ21hLXBlb3BsZS1tcy1qd3Qtc2VjcmV0LWtleS0yMDI0LXNlY3VyZS1lbm91Z2gtZm9yLUhTMjU2"
+  expiration-hours: 24
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:7500"
