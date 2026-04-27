@@ -1,9 +1,11 @@
 package co.com.pragma.peoplems.usecase.updateperson;
 
+import co.com.pragma.peoplems.model.exception.ForbiddenException;
 import co.com.pragma.peoplems.model.exception.GlobalExceptionEnum;
 import co.com.pragma.peoplems.model.exception.NotFoundException;
 import co.com.pragma.peoplems.model.person.Person;
 import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
+import co.com.pragma.peoplems.model.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -14,20 +16,27 @@ import java.time.LocalDateTime;
 public class UpdatePersonUseCase implements UpdatePersonService {
 
     private final PersonRepository personRepository;
+    private final UserContext userContext;
 
     @Override
     @Transactional
     public Mono<Person> update(Long id, Person personData) {
-        return personRepository.findById(id)
-                .switchIfEmpty(Mono.error(
-                        new NotFoundException(GlobalExceptionEnum.PERSON_NOT_FOUND)))
-                .flatMap(existing -> {
-                    Person updated = existing.toBuilder()
-                            .name(personData.getName())
-                            .age(personData.getAge())
-                            .updatedAt(LocalDateTime.now())
-                            .build();
-                    return personRepository.save(updated);
+        return userContext.currentUser()
+                .flatMap(user -> {
+                    if (Boolean.FALSE.equals(user.getIsAdmin())) {
+                        return Mono.error(new ForbiddenException(GlobalExceptionEnum.FORBIDDEN_ACCESS));
+                    }
+                    return personRepository.findById(id)
+                            .switchIfEmpty(Mono.error(
+                                    new NotFoundException(GlobalExceptionEnum.PERSON_NOT_FOUND)))
+                            .flatMap(existing -> {
+                                Person updated = existing.toBuilder()
+                                        .name(personData.getName())
+                                        .age(personData.getAge())
+                                        .updatedAt(LocalDateTime.now())
+                                        .build();
+                                return personRepository.save(updated);
+                            });
                 });
     }
 }
