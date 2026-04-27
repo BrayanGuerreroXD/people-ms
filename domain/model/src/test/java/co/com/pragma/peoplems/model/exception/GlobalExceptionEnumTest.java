@@ -8,10 +8,10 @@ class GlobalExceptionEnumTest {
 
     @Test
     void enumShouldContainExpectedValues() {
-        assertThat(GlobalExceptionEnum.values()).hasSize(2);
+        assertThat(GlobalExceptionEnum.values()).hasSize(5);
         assertThat(GlobalExceptionEnum.values())
                 .extracting(GlobalExceptionEnum::name)
-                .containsExactly("PERSON_NOT_FOUND", "EMAIL_ALREADY_EXISTS");
+                .containsExactly("PERSON_NOT_FOUND", "EMAIL_ALREADY_EXISTS", "INVALID_CREDENTIALS", "INVALID_TOKEN", "FORBIDDEN_ACCESS");
     }
 
     @Test
