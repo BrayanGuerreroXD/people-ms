@@ -1,0 +1,48 @@
+### Create person → expect 201
+POST http://localhost:7500/api/persons
+Content-Type: application/json
+
+{
+  "email": "john@test.com",
+  "password": "secret",
+  "name": "John",
+  "age": 30
+}
+
+### Get person by ID → expect 200
+GET http://localhost:7500/api/persons/1
+
+### Get all non-admin persons → expect 200 with array
+GET http://localhost:7500/api/persons
+
+### Update person name and age → expect 200
+PUT http://localhost:7500/api/persons/1
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "age": 31
+}
+
+### Duplicate email → expect 409 with EMAIL_ALREADY_EXISTS
+POST http://localhost:7500/api/persons
+Content-Type: application/json
+
+{
+  "email": "john@test.com",
+  "password": "secret",
+  "name": "John",
+  "age": 30
+}
+
+### Person not found → expect 404 with PERSON_NOT_FOUND
+GET http://localhost:7500/api/persons/999
+
+### Update non-existing person → expect 404 with PERSON_NOT_FOUND
+PUT http://localhost:7500/api/persons/999
+Content-Type: application/json
+
+{
+  "name": "Ghost",
+  "age": 40
+}

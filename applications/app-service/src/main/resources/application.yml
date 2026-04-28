@@ -1,0 +1,32 @@
+server:
+  port: 7500
+spring:
+  application:
+    name: "ms-people"
+  devtools:
+    add-properties: false
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/db_people
+    username: root
+    password: 1234
+  flyway:
+    url: jdbc:mysql://localhost:3306/db_people
+    user: root
+    password: 1234
+    locations: classpath:db/migration
+  profiles:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+jwt:
+  secret: "cHJhZ21hLXBlb3BsZS1tcy1qd3Qtc2VjcmV0LWtleS0yMDI0LXNlY3VyZS1lbm91Z2gtZm9yLUhTMjU2"
+  expiration-hours: 24
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:7500"
