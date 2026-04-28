@@ -1,47 +1,163 @@
-# Proyecto Base Implementando Clean Architecture
+# People Microservice
 
-## Antes de Iniciar
+Spring WebFlux API for handling CREATE, READ, and UPDATE operations on persons and authentication flow via Spring Security JWT token
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
+## Technologies
+- Spring WebFlux
+- R2DBC
+- Java 25
+- Gradle
+- MySQL
+- OpenApi Swagger
 
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+## Architecture
 
-# Arquitectura
+This project follows **Clean Architecture** principles as implemented in the Bancolombia scaffold. The architecture is organized into independent layers that facilitate maintenance and scalability.
 
-![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
+### Project Structure (Based on Bancolombia Scaffold)
 
-## Domain
+```
+people-ms/
+├── applications/                 # Application layer (entry points)
+│   └── app-service/             # Main application service
+│       ├── src/
+│       │   ├── main/
+│       │   │   ├── java/        # Main source code
+│       │   │   └── resources/   # Configuration resources
+│       │   └── test/            # Tests
+│       └── build.gradle         # Gradle configuration for the service
+├── domain/                      # Domain layer (pure business)
+│   ├── model/                   # Entities and domain models
+│   └── usecase/                 # Application use cases
+├── infrastructure/              # Infrastructure layer (technical details)
+│   ├── driven-adapters/         # Adapters to external systems
+│   │   └── r2dbc-repository/    # Reactive repository adapter
+│   └── entry-points/            # Application entry points
+│       └── reactive-web/        # Reactive web adapter (WebFlux)
+├── deployment/                  # Deployment configurations
+├── build.gradle                 # Root Gradle configuration
+├── settings.gradle              # Multi-project configuration
+└── README.md                    # This file
+```
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+### Layer Details
 
-## Usecases
+1. **Domain**: Contains pure business logic, independent of frameworks and technologies.
+   - `model`: Entities representing business concepts
+   - `usecase`: Implementation of use cases that orchestrate application logic
 
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+2. **Infrastructure**: Technical implementation details.
+   - `driven-adapters`: Adapters that allow the domain to communicate with the outside world (databases, external services)
+   - `entry-points`: System entry points (APIs, message queues, etc.)
 
-## Infrastructure
+3. **Applications**: Specific configuration for each service/application.
+   - Contains the main class with the `main` method
+   - Configures beans and dependencies specific to the service
 
-### Helpers
+## Configuration
 
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
+Example configuration in `applications/app-service/src/main/resources/application.yml`:
 
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+```yaml
+server:
+  port: 7500
+spring:
+  application:
+    name: "ms-people"
+  devtools:
+    add-properties: false
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/db_people
+    username: root
+    password: 1234
+  flyway:
+    url: jdbc:mysql://localhost:3306/db_people
+    user: root
+    password: 1234
+    locations: classpath:db/migration
+  profiles:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+jwt:
+  secret: {secret-key}
+  expiration-hours: 24
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:7500"
+```
 
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
+## Development Commands
 
-### Driven Adapters
+### Start the API
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+```bash
+# From the project root
+./gradlew applications:app-service:bootRun
+```
 
-### Entry Points
+The API will be available at `http://localhost:7500`
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+### Run Tests
 
-## Application
+```bash
+# Run all tests
+./gradlew test
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
+# Run tests for a specific module
+./gradlew applications:app-service:test
+./gradlew domain:model:test
+./gradlew domain:usecase:test
+./gradlew infrastructure:driven-adapters:r2dbc-repository:test
+./gradlew infrastructure:entry-points:reactive-web:test
+```
 
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+### Generate OpenApi Documentation (Swagger)
+
+Once the application is running, access:
+- Swagger UI: `http://localhost:7500/swagger-ui.html`
+- OpenApi JSON: `http://localhost:7500/v3/api-docs`
+
+## Main Endpoints
+
+### Persons
+- `POST /persons` - Create a new person
+- `GET /persons/{id}` - Get a person by ID
+- `PUT /persons/{id}` - Update an existing person
+
+### Authentication
+- `POST /auth/login` - Log in and obtain JWT token
+- `POST /auth/logout` - Log out
+
+## Implemented Features
+
+- ✅ Clean Architecture following Bancolombia principles
+- ✅ Reactive programming with Spring WebFlux and R2DBC
+- ✅ Authentication and authorization with JWT
+- ✅ Automatic API documentation with OpenApi/Swagger
+- ✅ Global exception handling
+- ✅ CORS configuration
+- ✅ Health checks and metrics with Actuator
+- ✅ Unit tests in all layers
+- ✅ Database migrations with Flyway
+
+## Prerequisites
+
+- Java 25
+- Gradle 8.x
+- MySQL 8.x
+- Docker (optional, for development with containers)
+
+## Getting Started
+
+1. Clone the repository
+2. Create the `db_people` database in MySQL
+3. Configure credentials in `application.yml` if needed
+4. Run `./gradlew applications:app-service:bootRun`
+5. Access `http://localhost:7500/swagger-ui.html` to test the endpoints
