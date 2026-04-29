@@ -16,6 +16,11 @@ spring:
     locations: classpath:db/migration
   profiles:
     include: null
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 management:
   endpoints:
     web:
@@ -30,3 +35,8 @@ jwt:
   expiration-hours: 24
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:7500"
+kafka:
+  topics:
+    auth-login-admin: auth.login.admin
+    generic-auth-login: generic.auth.login
+    generic-auth-logout: generic.auth.logout

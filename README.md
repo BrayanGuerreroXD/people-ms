@@ -9,6 +9,7 @@ Spring WebFlux API for handling CREATE, READ, and UPDATE operations on persons a
 - Gradle
 - MySQL
 - OpenApi Swagger
+- Apache Kafka
 
 ## Architecture
 
@@ -91,6 +92,18 @@ jwt:
   expiration-hours: 24
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:7500"
+spring:
+  kafka:
+    bootstrap-servers: {kafka-host}:{kafka-port}   # e.g. localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+kafka:
+  topics:
+    auth-login-admin: {topic-name}       # e.g. auth.login.admin
+    generic-auth-login: {topic-name}     # e.g. generic.auth.login
+    generic-auth-logout: {topic-name}    # e.g. generic.auth.logout
 ```
 
 ## Development Commands
@@ -146,6 +159,7 @@ Once the application is running, access:
 - ✅ Health checks and metrics with Actuator
 - ✅ Unit tests in all layers
 - ✅ Database migrations with Flyway
+- ✅ Async Kafka event publishing on login/logout
 
 ## Prerequisites
 
