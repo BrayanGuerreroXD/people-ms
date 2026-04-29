@@ -4,6 +4,7 @@ dependencies {
 	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 	implementation project(':r2dbc-repository')
 	implementation project(':reactive-web')
+	implementation project(':kafka-publisher')
     implementation project(':model')
     implementation project(':usecase')
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -14,6 +15,10 @@ dependencies {
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'tools.jackson.core:jackson-databind'
+}
+
+bootRun {
+    jvmArgs = ['--enable-native-access=ALL-UNNAMED']
 }
 
 tasks.register('explodedJar', Copy) {

@@ -8,4 +8,6 @@ public interface JwtGateway {
      * also checks LoggedUser.isAdmin == requiredIsAdmin; throws ForbiddenException otherwise.
      */
     LoggedUser validateToken(String token, Boolean requiredIsAdmin);
+
+    int getExpirationSeconds();
 }
