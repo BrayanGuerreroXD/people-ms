@@ -17,6 +17,10 @@ dependencies {
     testImplementation 'tools.jackson.core:jackson-databind'
 }
 
+bootRun {
+    jvmArgs = ['--enable-native-access=ALL-UNNAMED']
+}
+
 tasks.register('explodedJar', Copy) {
     with jar
     into layout.buildDirectory.dir("exploded")

@@ -35,6 +35,11 @@ jwt:
   expiration-hours: 24
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:7500"
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
 kafka:
   topics:
     auth-login-admin: auth.login.admin
