@@ -1,8 +1,8 @@
 package co.com.pragma.peoplems.usecase.logout;
 
+import co.com.pragma.peoplems.model.event.gateways.EventGateway;
 import co.com.pragma.peoplems.model.exception.UnauthorizedException;
 import co.com.pragma.peoplems.model.person.Person;
-import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
 import co.com.pragma.peoplems.model.security.JwtGateway;
 import co.com.pragma.peoplems.model.security.LoggedUser;
 import co.com.pragma.peoplems.usecase.getperson.GetPersonService;
@@ -27,6 +27,7 @@ class LogoutUseCaseTest {
     @Mock private GetPersonService getPersonService;
     @Mock private co.com.pragma.peoplems.usecase.onlysaveperson.OnlySavePersonService onlySavePersonService;
     @Mock private JwtGateway jwtGateway;
+    @Mock private EventGateway eventGateway;
 
     @InjectMocks
     private LogoutUseCase logoutUseCase;
@@ -69,6 +70,7 @@ class LogoutUseCaseTest {
         when(jwtGateway.validateToken("valid-jwt", null)).thenReturn(LOGGED_USER);
         when(getPersonService.getByEmail("user@test.com")).thenReturn(Mono.just(PERSON_WITH_TOKEN));
         when(onlySavePersonService.save(any(Person.class))).thenReturn(Mono.just(nulledToken));
+        when(eventGateway.publishGenericAuthLogout(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(logoutUseCase.logout("valid-jwt"))
                 .verifyComplete();

@@ -58,6 +58,11 @@ public class JwtAdapter implements JwtGateway {
         }
     }
 
+    @Override
+    public int getExpirationSeconds() {
+        return (int) (jwtProperties.getExpirationHours() * 3600L);
+    }
+
     private SecretKey buildKey() {
         return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }

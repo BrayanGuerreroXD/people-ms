@@ -1,9 +1,9 @@
 package co.com.pragma.peoplems.usecase.login;
 
 import co.com.pragma.peoplems.model.auth.Auth;
+import co.com.pragma.peoplems.model.event.gateways.EventGateway;
 import co.com.pragma.peoplems.model.exception.UnauthorizedException;
 import co.com.pragma.peoplems.model.person.Person;
-import co.com.pragma.peoplems.model.person.gateways.PersonRepository;
 import co.com.pragma.peoplems.model.security.EncryptionGateway;
 import co.com.pragma.peoplems.model.security.JwtGateway;
 import co.com.pragma.peoplems.model.security.LoggedUser;
@@ -31,6 +31,7 @@ class LoginUseCaseTest {
     @Mock private co.com.pragma.peoplems.usecase.onlysaveperson.OnlySavePersonService onlySavePersonService;
     @Mock private EncryptionGateway encryptionGateway;
     @Mock private JwtGateway jwtGateway;
+    @Mock private EventGateway eventGateway;
 
     @InjectMocks
     private LoginUseCase loginUseCase;
@@ -71,7 +72,9 @@ class LoginUseCaseTest {
         when(getPersonService.getByEmail("user@test.com")).thenReturn(Mono.just(PERSON));
         when(encryptionGateway.matches("raw-pw", "hashed-pw")).thenReturn(true);
         when(jwtGateway.generateToken(any(LoggedUser.class))).thenReturn("jwt-token");
+        when(jwtGateway.getExpirationSeconds()).thenReturn(86400);
         when(onlySavePersonService.save(any(Person.class))).thenReturn(Mono.just(saved));
+        when(eventGateway.publishGenericAuthLogin(any())).thenReturn(Mono.empty());
         Auth auth = Auth.builder().email("user@test.com").password("raw-pw").build();
 
         StepVerifier.create(loginUseCase.login(auth))
