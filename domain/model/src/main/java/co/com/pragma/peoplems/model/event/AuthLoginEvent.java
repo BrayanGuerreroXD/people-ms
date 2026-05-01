@@ -8,6 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class AuthLoginEvent {
+    private String name;
     private String email;
     private String token;
     private Integer expiresIn;
