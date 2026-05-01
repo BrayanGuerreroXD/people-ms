@@ -168,6 +168,11 @@ Once the application is running, access:
 - MySQL 8.x
 - Docker (optional, for development with containers)
 
+## Default Admin Credentials
+
+- **Email:** `admin@pragma.com`
+- **Password:** `Admin123456`
+
 ## Getting Started
 
 1. Clone the repository
