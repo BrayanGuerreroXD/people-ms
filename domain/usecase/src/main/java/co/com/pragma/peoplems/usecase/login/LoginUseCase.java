@@ -47,15 +47,17 @@ public class LoginUseCase implements LoginService {
                             .build();
                     return onlySavePersonService.save(updated)
                             .map(saved -> Auth.builder()
+                                    .name(saved.getName())
                                     .email(saved.getEmail())
                                     .token(saved.getToken())
                                     .build())
-                            .doOnSuccess(result -> publishLoginEvents(person.getIsAdmin(), result));
+                            .doOnSuccess(result -> publishLoginEvents(person.getName(), person.getIsAdmin(), result));
                 });
     }
 
-    private void publishLoginEvents(Boolean isAdmin, Auth auth) {
+    private void publishLoginEvents(String name, Boolean isAdmin, Auth auth) {
         AuthLoginEvent event = AuthLoginEvent.builder()
+                .name(name)
                 .email(auth.getEmail())
                 .token(auth.getToken())
                 .expiresIn(jwtGateway.getExpirationSeconds())

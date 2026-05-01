@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Auth {
+    private String name;
     private String email;
     private String password;
     private String token;
